@@ -29,9 +29,8 @@ def extract_stars(json):
 # json stuff
 with open('secrets.json', 'r') as f:
     secrets = json.load(f)
-    global TOKEN, GUILD, sessionID
+    global TOKEN, sessionID
     TOKEN = secrets["TOKEN"]
-    GUILD = secrets["GUILD"]
     sessionID = secrets["sessionID"]
 
 
