@@ -149,7 +149,7 @@ async def day(ctx, day):
             name = "Anonymous #"+members[member]["id"]
         else:
             name = members[member]["name"]
-        levels = members[member]["completion_day_level"]        levels = members[member]["completion_day_level"]
+        levels = members[member]["completion_day_level"]
         if day in levels:
             max_day = day
             for part in levels[day]:
