@@ -47,6 +47,33 @@ def update_json():
     r = requests.get(url, cookies=cookies)
     global data
     data = r.json()
+    with open('../data.json', 'w') as f:
+        json.dump(data, f)
+    with open('../last_update', 'w') as f:
+        f.write(str(current_time))
+
+
+def update_json_local():
+    print("updated from cache")
+    global current_time
+    try:
+        f = open('../last_update', 'r')
+        current_time = float(f.read())
+    except:
+        update_json()
+    global data
+    try:
+        f = open('../data.json', 'r')
+        data = json.load(f)
+    except:
+        update_json()
+
+
+def update():
+    if(time()-current_time > 900):
+        update_json()
+    else:
+        update_json_local()
 
 
 async def record_usage(ctx):
@@ -60,11 +87,7 @@ bot = commands.Bot(command_prefix='!')
 @bot.command(name='score', help="Get score of user")
 @commands.before_invoke(record_usage)
 async def score(ctx, *, name):
-    try:
-        update_json()
-    except RateLimitException:
-        print("rate limited")
-
+    update()
     members = data["members"]
     name_num = 0
     for member_num in members:
@@ -117,18 +140,16 @@ async def day(ctx, day):
     embed.set_author(name="Advent of Code Leaderboard",
                      icon_url="https://i.imgur.com/Jlp3GB8.png")
     embed.set_thumbnail(url="https://i.stack.imgur.com/ArhPo.gif")
-    lines = []
-
-    try:
-        update_json()
-    except RateLimitException:
-        print("rate limited")
+    update()
 
     part1 = {}
     part2 = {}
     members = data["members"]
-    for member in members:
-        name = members[member]["name"]
+    for member in members.keys():
+        if member["name"] == None:
+            name = "Anonymous #"+member["id"]
+        else:
+            name = members[member]["name"]
         levels = members[member]["completion_day_level"]
         if day in levels:
             max_day = day
@@ -179,12 +200,7 @@ async def board(ctx):
                      icon_url="https://i.imgur.com/Jlp3GB8.png")
     embed.set_thumbnail(url="https://i.stack.imgur.com/ArhPo.gif")
     lines = []
-
-    try:
-        update_json()
-    except RateLimitException:
-        print("rate limited")
-
+    update()
     members = data["members"]
     i = 0
 
@@ -196,7 +212,7 @@ async def board(ctx):
     for leader in lines:
         i += 1
         if leader["name"] == None:
-            name = "Anonymous #"+leader+": "
+            name = "Anonymous #"+str(leader["id"])+" "
         else:
             name = str(leader["name"])+"  "
         if (i == 1):
@@ -219,4 +235,5 @@ async def board(ctx):
         text="Updated at " + updated + "\nNext update available at " + nextupdate)
     await ctx.send(embed=embed)
 
+update_json_local()
 bot.run(TOKEN)
