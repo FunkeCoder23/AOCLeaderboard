@@ -144,12 +144,12 @@ async def day(ctx, day):
     part1 = {}
     part2 = {}
     members = data["members"]
-    for member in members.keys():
-        if member["name"] == None:
-            name = "Anonymous #"+member["id"]
+    for member in members:
+        if members[member]["name"] == None:
+            name = "Anonymous #"+members[member]["id"]
         else:
             name = members[member]["name"]
-        levels = members[member]["completion_day_level"]
+        levels = members[member]["completion_day_level"]        levels = members[member]["completion_day_level"]
         if day in levels:
             max_day = day
             for part in levels[day]:
