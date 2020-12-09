@@ -12,6 +12,10 @@ from datetime import datetime
 from random import randint
 
 
+# def get_emoji(emoji):
+#     client.emojis.find(emoji= > emoji.name == = emoji)
+
+
 def extract_score(json):
     try:
         return (int(json['local_score']))
@@ -190,7 +194,54 @@ async def day(ctx, day):
     await ctx.send(embed=embed)
 
 
-@ bot.command(name='leaderboard', help='Show the Advent of Code Leaderboard')
+@ bot.command(name='leaderboard', help='Show the Advent of Code Top 10')
+@ commands.before_invoke(record_usage)
+async def board(ctx):
+    embed = Embed(title="Join the Leaderboard", url="https://adventofcode.com/2020",
+                  description="Leaderboard Code: 974092-d0365788", color=0x226d1c)
+    embed.set_author(name="Advent of Code Leaderboard",
+                     icon_url="https://i.imgur.com/Jlp3GB8.png")
+    embed.set_thumbnail(url="https://i.stack.imgur.com/ArhPo.gif")
+    lines = []
+    update()
+    members = data["members"]
+    i = 0
+
+    for member_num in members:
+        lines.append(members[member_num])
+    lines.sort(key=extract_score, reverse=True)
+    lines.sort(key=extract_stars, reverse=True)
+
+    for leader in lines:
+        i += 1
+        if(i > 10):
+            break
+        if leader["name"] == None:
+            name = "Anonymous #"+str(leader["id"])+" "
+        else:
+            name = str(leader["name"])+"  "
+        if (i == 1):
+            name += "<:platinum:752979216592797836>"
+        elif (i == 2):
+            name += "<:gold:752979203078619186>"
+        elif (i == 3):
+            name += "<:silver:752979184367698041>"
+
+        response = "‎‎⠀" + str(leader["stars"])+" ⭐ | "
+        response += str(leader["local_score"]) + str(" points")
+        response += "!" if (leader["local_score"] !=
+                            0) else " <:sunglass_cry:757783574232694906>"
+        embed.add_field(name=str(i)+". " + name,
+                        value=response, inline=False)
+    updated = datetime.fromtimestamp(current_time).strftime('%I:%M:%S %p')
+    nextupdate = datetime.fromtimestamp(
+        900+current_time).strftime('%I:%M:%S %p')
+    embed.set_footer(
+        text="Updated at " + updated + "\nNext update available at " + nextupdate)
+    await ctx.send(embed=embed)
+
+
+@ bot.command(name='all', help='Show the full Advent of Code Leaderboard')
 @ commands.before_invoke(record_usage)
 async def board(ctx):
     embed = Embed(title="Join the Leaderboard", url="https://adventofcode.com/2020",
